@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using FitBitWebAuthenticator.Models;
 using Newtonsoft.Json;
@@ -13,14 +14,14 @@ namespace FitBitWebAuthenticator.FirBit
             FitBitResponseModel tokenDetails = new FitBitResponseModel();
             try
             {
-                var client = new RestClient(FitbitConfiguration.TokenApiUri)
+                RestClient client = new RestClient(FitbitConfiguration.TokenApiUri)
                 {
                     Timeout = -1
                 };
 
-                var _authorization = "Basic " + FitbitServices.Base64String();
+                string _authorization = "Basic " + FitbitServices.Base64String();
 
-                var request = new RestRequest(Method.POST);
+                RestRequest request = new RestRequest(Method.POST);
                 request.AddHeader("Authorization", _authorization);
                 request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
                 request.AddParameter("grant_type", FitbitConfiguration.GrantType);
@@ -32,20 +33,21 @@ namespace FitBitWebAuthenticator.FirBit
 
                 if (response.IsSuccessful)
                 {
-                    var settings = new JsonSerializerSettings
+                    JsonSerializerSettings settings = new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore,
                         MissingMemberHandling = MissingMemberHandling.Ignore
                     };
 
-                    var _jsonResult = JsonConvert.DeserializeObject(response.Content).ToString();
+                    string _jsonResult = JsonConvert.DeserializeObject(response.Content).ToString();
 
-                    tokenDetails = JsonConvert.DeserializeObject<FitBitResponseModel>(_jsonResult, settings);
+                    tokenDetails = JsonConvert.DeserializeObject<FitBitResponseModel>(_jsonResult, 
+                        settings);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Debug.WriteLine("[ex] RestClient Exception" + ex.Message);
             }
 
             return tokenDetails;
@@ -79,7 +81,8 @@ namespace FitBitWebAuthenticator.FirBit
 
         public async Task FetchUserActivityForDateAsync(string userId, string date)
         {
-            var requestUri = "https://api.fitbit.com/1/user/" + userId + "/activities/date/" + date + ".json";
+            var requestUri = "https://api.fitbit.com/1/user/" + userId + "/activities/date/" 
+                + date + ".json";
 
             APIRequestAsync(requestUri);
         }

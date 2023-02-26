@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using FitBitWebAuthenticator.FirBit;
 using FitBitWebAuthenticator.Views;
@@ -21,13 +22,15 @@ namespace FitBitWebAuthenticator
 
         async Task StartFitbitAthenticationAsync()
         {
-            var authenticator = new WebAuthenticatorHandler();
+            WebAuthenticatorHandler authenticator = new WebAuthenticatorHandler();
 
-            var _fitbitCode = await authenticator.FetchFitbitCode();
+            string _fitbitCode = await authenticator.FetchFitbitCode();
 
             if (!string.IsNullOrEmpty(_fitbitCode))
             {
-                var _tokenResponse = await new FitbitAPIService().CallTokenAPIAsync(_fitbitCode);
+                Models.FitBitResponseModel _tokenResponse = 
+                    await new FitbitAPIService().CallTokenAPIAsync(_fitbitCode);
+
                 if (!string.IsNullOrEmpty(_tokenResponse.access_token))
                 {
                     Console.WriteLine($"Fitbit access token : {_tokenResponse.access_token}");
@@ -37,10 +40,10 @@ namespace FitBitWebAuthenticator
                     this.Navigation.PushAsync(new UserDetailsPage());
                 }
                 else
-                    Console.WriteLine("Error fetching token!!");
+                    Debug.WriteLine("Error fetching token!!");
             }
             else
-                Console.WriteLine("Login failed !!");
+                Debug.WriteLine("Login failed !!");
 
         }
 

@@ -2,6 +2,7 @@
 using Xamarin.Essentials;
 using System.Threading.Tasks;
 using FitBitWebAuthenticator.FirBit;
+using System.Diagnostics;
 
 namespace FitBitWebAuthenticator
 {
@@ -9,26 +10,29 @@ namespace FitBitWebAuthenticator
     {
         public async Task<string> FetchFitbitCode()
         {
-            var code = "";
+            string code = "";
             try
             {
-                var callbackUrl = new Uri(FitbitConfiguration.Callback);
-                var loginUrl = new Uri(FitbitServices.BuildAuthenticationUrl());
-                var authenticationResult = await WebAuthenticator.AuthenticateAsync(loginUrl, callbackUrl);
+                Uri callbackUrl = new Uri(FitbitConfiguration.Callback);
+
+                Uri loginUrl = new Uri(FitbitServices.BuildAuthenticationUrl());
+
+                WebAuthenticatorResult authenticationResult = 
+                    await WebAuthenticator.AuthenticateAsync(loginUrl, callbackUrl);
 
                 code = authenticationResult.Properties["code"];
                 code = code.Replace("#_=_", "");
 
             }
-            catch (TaskCanceledException)
+            catch (TaskCanceledException ex1)
             {
-
+                Debug.WriteLine("[ex] TaskCanceledException: " + ex1.Message);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Debug.WriteLine("[ex] Exception: " + ex.Message);
             }
-            Console.WriteLine($"FetchFitbitCode : {code}");
+            Debug.WriteLine($"FetchFitbitCode : {code}");
             return code;
         } 
     }
